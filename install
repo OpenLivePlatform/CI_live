@@ -1,12 +1,15 @@
 #!/usr/bin/python
 
 import os
-import shutil
+
+service = "olp"
+version = "0.0.1"
 
 packages = {
     "openresty": {
         "url":  "https://openresty.org/download/openresty-1.11.2.5.tar.gz",
-        "options": "--prefix=/usr/local/olp --with-http_drizzle_module",
+        "options":
+            "--prefix=/usr/local/" + service + " --with-http_drizzle_module",
         "install": "gmake && gmake install"
     },
     "drizzle": {
@@ -46,10 +49,8 @@ def addmodule(module):
     if len(module["tag"]) > 0:
         tag = " -b " + module["tag"]
 
-    if os.path.exists(path):
-        shutil.rmtree(path)
-
-    os.system("git clone " + module["url"] + tag)
+    if not os.path.exists(path):
+        os.system("git clone " + module["url"] + tag)
 
     return option
 
@@ -61,12 +62,13 @@ def install(name):
     os.chdir(name)
     os.system("./configure " + options + " && " + install)
     os.chdir("../")
-    os.system("pwd")
 
 
 if __name__ == '__main__':
     for name, package in packages.items():
         download(name, package["url"])
+
+    os.system("./version " + service + " " + version)
 
     for module in modules.values():
         packages["openresty"]["options"] += addmodule(module)
