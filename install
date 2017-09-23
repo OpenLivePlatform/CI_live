@@ -4,12 +4,13 @@ import os
 
 service = "olp"
 version = "0.0.1"
+install_path = "/usr/local/" + service
 
 packages = {
     "openresty": {
         "url":  "https://openresty.org/download/openresty-1.11.2.5.tar.gz",
         "options":
-            "--prefix=/usr/local/" + service + " --with-http_drizzle_module",
+            "--prefix=" + install_path + " --with-http_drizzle_module",
         "install": "gmake && gmake install"
     },
     "drizzle": {
@@ -64,6 +65,15 @@ def install(name):
     os.chdir("../")
 
 
+def conf():
+    if os.path.exists(install_path + "/nginx/conf/nginx_dynamic.conf"):
+        print(install_path + "/nginx/conf/nginx_dynamic.conf")
+        return
+
+    print("cp conf/* " + install_path + "/nginx/conf/")
+    os.system("cp conf/* " + install_path + "/nginx/conf/")
+
+
 if __name__ == '__main__':
     for name, package in packages.items():
         download(name, package["url"])
@@ -77,3 +87,5 @@ if __name__ == '__main__':
         install("drizzle")
         os.system("ldconfig")
     install("openresty")
+
+    conf()
