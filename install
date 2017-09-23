@@ -1,0 +1,77 @@
+#!/usr/bin/python
+
+import os
+import shutil
+
+packages = {
+    "openresty": {
+        "url":  "https://openresty.org/download/openresty-1.11.2.5.tar.gz",
+        "options": "--prefix=/usr/local/olp --with-http_drizzle_module",
+        "install": "gmake && gmake install"
+    },
+    "drizzle": {
+        "url": "http://agentzh.org/misc/nginx/drizzle7-2011.07.21.tar.gz",
+        "options": "--without-server",
+        "install": "make libdrizzle-1.0 && make install-libdrizzle-1.0"
+    }
+}
+
+modules = {
+    "rtmp": {
+        "url": "https://github.com/AlexWoo/nginx-rtmp-module.git",
+        "tag": ""
+    },
+    "toolkit": {
+        "url": "https://github.com/AlexWoo/nginx-toolkit-module.git",
+        "tag": ""
+    }
+}
+
+
+def download(name, url):
+    pack = os.path.basename(url)
+    pdir = pack.split(".tar.gz")[0]
+
+    if not os.path.isdir(name):
+        if not os.path.isfile(pack):
+            os.system("wget " + url)
+        os.system("tar xzf " + pack)
+        os.rename(pdir, name)
+
+
+def addmodule(module):
+    tag = ""
+    path = os.path.basename(module["url"]).split(".git")[0]
+    option = " --add-module=../" + path
+    if len(module["tag"]) > 0:
+        tag = " -b " + module["tag"]
+
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+    os.system("git clone " + module["url"] + tag)
+
+    return option
+
+
+def install(name):
+    options = packages[name]["options"]
+    install = packages[name]["install"]
+
+    os.chdir(name)
+    os.system("./configure " + options + " && " + install)
+    os.chdir("../")
+    os.system("pwd")
+
+
+if __name__ == '__main__':
+    for name, package in packages.items():
+        download(name, package["url"])
+
+    for module in modules.values():
+        packages["openresty"]["options"] += addmodule(module)
+
+    if not os.path.exists("/usr/local/lib/libdrizzle.so"):
+        install("drizzle")
+        os.system("ldconfig")
+    install("openresty")
