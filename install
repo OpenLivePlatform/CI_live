@@ -28,6 +28,10 @@ modules = {
     "toolkit": {
         "url": "https://github.com/AlexWoo/nginx-toolkit-module.git",
         "tag": ""
+    },
+    "multiport": {
+        "url": "https://github.com/AlexWoo/nginx-multiport-module.git",
+        "tag": ""
     }
 }
 
