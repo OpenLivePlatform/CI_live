@@ -35,6 +35,14 @@ modules = {
     }
 }
 
+lualib = {
+    "lua-resty-http": {
+        "url": "https://github.com/pintsized/lua-resty-http.git",
+        "path": "lib/",
+        "tag": ""
+    }
+}
+
 
 def download(name, url):
     pack = os.path.basename(url)
@@ -58,6 +66,20 @@ def addmodule(module):
         os.system("git clone " + module["url"] + tag)
 
     return option
+
+
+def addlualib(lib):
+    tag = ""
+    path = os.path.basename(lib["url"]).split(".git")[0]
+    src_path = path + "/" + lib["path"]
+    dest_path = install_path + "/lualib/"
+    if len(lib["tag"]) > 0:
+        tag = " -b " + lib["tag"]
+
+    if not os.path.exists(path):
+        os.system("git clone " + lib["url"] + tag)
+
+    os.system("cp -r " + src_path + " " + dest_path)
 
 
 def install(name):
@@ -86,6 +108,9 @@ if __name__ == '__main__':
 
     for module in modules.values():
         packages["openresty"]["options"] += addmodule(module)
+
+    for lib in lualib.values():
+        addlualib(lib)
 
     if not os.path.exists("/usr/local/lib/libdrizzle.so"):
         install("drizzle")
