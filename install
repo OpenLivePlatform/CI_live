@@ -109,12 +109,12 @@ if __name__ == '__main__':
     for module in modules.values():
         packages["openresty"]["options"] += addmodule(module)
 
-    for lib in lualib.values():
-        addlualib(lib)
-
     if not os.path.exists("/usr/local/lib/libdrizzle.so"):
         install("drizzle")
         os.system("ldconfig")
     install("openresty")
+
+    for lib in lualib.values():
+        addlualib(lib)
 
     conf()
